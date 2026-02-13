@@ -90,6 +90,7 @@ function buildToolResultSummaryExtension(params: {
     initialized: false,
     entryCount: 0,
     lastCleanupAt: null,
+    compactionOccurred: false,
     config,
     openClawConfig: params.cfg,
   };

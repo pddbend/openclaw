@@ -179,6 +179,8 @@ export type ToolResultSummaryRuntime = {
   entryCount: number;
   /** Last cleanup timestamp */
   lastCleanupAt: number | null;
+  /** Whether compaction has occurred in this session (enables retrieval) */
+  compactionOccurred: boolean;
 };
 
 /**

@@ -19,6 +19,7 @@ function createDefaultRuntime(): ToolResultSummaryRuntime {
     initialized: false,
     entryCount: 0,
     lastCleanupAt: null,
+    compactionOccurred: false,
   };
 }
 

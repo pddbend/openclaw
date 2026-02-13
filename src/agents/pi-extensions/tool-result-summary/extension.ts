@@ -21,7 +21,7 @@ import type { OpenClawConfig } from "../../../config/config.js";
 import type { EmbeddingProvider } from "../../../memory/embeddings.js";
 import type { ToolResultSummaryConfig, ToolResultSummaryRuntimeValue } from "./types.js";
 import { createEmbeddingProvider } from "../../../memory/embeddings.js";
-import { createRetriever, buildSearchQuery } from "./retriever.js";
+import { createRetriever, buildSearchQuery, formatResultsForContext } from "./retriever.js";
 import { getToolResultSummaryRuntime, updateToolResultSummaryRuntime } from "./runtime.js";
 import { ToolResultSummaryStore } from "./store.js";
 import { createSummarizer, createLLMClient } from "./summarizer.js";
@@ -102,8 +102,14 @@ export default function toolResultSummaryExtension(api: ExtensionAPI): void {
     return handleToolResult(event, ctx);
   });
 
+  // Mark compaction occurred when session is about to compact
+  api.on("session_before_compact", async (_event, ctx: ExtensionContext) => {
+    updateToolResultSummaryRuntime(ctx.sessionManager, {
+      compactionOccurred: true,
+    });
+  });
+
   api.on("context", async (event, ctx) => {
-    // Use context event for retrieval instead of before_agent_start
     // Check if we should inject context
     const runtime = getRuntime(ctx.sessionManager);
     if (!runtime || !runtime.config.enabled) {
@@ -112,6 +118,11 @@ export default function toolResultSummaryExtension(api: ExtensionAPI): void {
 
     const config = runtime.config;
     if (config.mode === "off" || config.mode === "store-only") {
+      return undefined;
+    }
+
+    // Only retrieve after compaction has occurred (avoid redundancy with existing context)
+    if (!runtime.compactionOccurred) {
       return undefined;
     }
 
@@ -143,14 +154,30 @@ export default function toolResultSummaryExtension(api: ExtensionAPI): void {
         return undefined;
       }
 
-      // Update access counts
-      for (const r of result.results) {
+      // Deduplication: filter out results already in current context
+      const existingToolCallIds = collectExistingToolCallIds(messages);
+      const filteredResults = result.results.filter(
+        (r) => !existingToolCallIds.has(r.entry.toolCallId),
+      );
+
+      if (filteredResults.length === 0) {
+        return undefined;
+      }
+
+      // Update access counts for filtered results
+      for (const r of filteredResults) {
         await services.store.touch(r.entry.id);
       }
 
-      // Inject context by prepending to the first user message
-      // This is done by returning modified messages
-      const contextNote = `\n\n${result.contextBlock}`;
+      // Re-format filtered results
+      const filteredContextBlock = formatResultsForContext(
+        filteredResults,
+        config.retrieval.injectFullContent,
+        config.retrieval.maxFullContentChars,
+      );
+
+      // Inject context by appending to the last user message
+      const contextNote = `\n\n${filteredContextBlock}`;
       const modifiedMessages = messages.map((m) => {
         if (m.role === "user" && m === lastUserMessage) {
           if (typeof m.content === "string") {
@@ -174,6 +201,22 @@ export default function toolResultSummaryExtension(api: ExtensionAPI): void {
       return undefined;
     }
   });
+}
+
+/**
+ * Collect existing tool call IDs from messages in current context.
+ */
+function collectExistingToolCallIds(messages: unknown[]): Set<string> {
+  const ids = new Set<string>();
+
+  for (const msg of messages) {
+    const m = msg as { role?: string; toolCallId?: string };
+    if (m.role === "toolResult" && m.toolCallId) {
+      ids.add(m.toolCallId);
+    }
+  }
+
+  return ids;
 }
 
 /**
