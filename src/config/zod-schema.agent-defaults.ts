@@ -88,7 +88,7 @@ export const AgentDefaultsSchema = z
       })
       .strict()
       .optional(),
-    toolResultVector: z
+    toolResultSummary: z
       .object({
         enabled: z.boolean().optional(),
         mode: z

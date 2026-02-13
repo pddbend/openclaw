@@ -1,11 +1,11 @@
 /**
- * Retrieval logic for tool result vector store.
+ * Retrieval logic for tool result summary store.
  *
  * Handles searching and formatting relevant tool results for context injection.
  */
 
 import type { EmbeddingProvider } from "../../../memory/embeddings.js";
-import type { ToolResultVectorStore } from "./store.js";
+import type { ToolResultSummaryStore } from "./store.js";
 import type { ToolResultSearchResult, RetrievalConfig } from "./types.js";
 import { extractTextContent } from "./summarizer.js";
 
@@ -26,7 +26,7 @@ export type FormattedRetrievalResult = {
  */
 export function createRetriever(
   config: RetrievalConfig,
-  store: ToolResultVectorStore,
+  store: ToolResultSummaryStore,
   embeddings: EmbeddingProvider,
 ) {
   return {

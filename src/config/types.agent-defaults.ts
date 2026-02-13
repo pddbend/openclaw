@@ -49,11 +49,11 @@ export type AgentContextPruningConfig = {
 };
 
 /**
- * Tool Result Vector extension configuration.
+ * Tool Result Summary extension configuration.
  * Stores tool execution results with LLM-generated summaries in a vector database
  * for semantic retrieval across sessions.
  */
-export type AgentToolResultVectorConfig = {
+export type AgentToolResultSummaryConfig = {
   /** Whether the extension is enabled (default: false). */
   enabled?: boolean;
   /** Mode: "off", "store-only", "retrieve-only", "full" (default: "full"). */
@@ -187,7 +187,7 @@ export type AgentDefaultsConfig = {
   /** Opt-in: prune old tool results from the LLM context to reduce token usage. */
   contextPruning?: AgentContextPruningConfig;
   /** Opt-in: store tool results with LLM summaries in vector DB for retrieval. */
-  toolResultVector?: AgentToolResultVectorConfig;
+  toolResultSummary?: AgentToolResultSummaryConfig;
   /** Compaction tuning and pre-compaction memory flush behavior. */
   compaction?: AgentCompactionConfig;
   /** Vector memory search configuration (per-agent overrides supported). */

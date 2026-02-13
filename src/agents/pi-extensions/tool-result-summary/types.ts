@@ -1,5 +1,5 @@
 /**
- * Type definitions for Tool Result Vector extension.
+ * Type definitions for Tool Result Summary extension.
  *
  * Stores tool execution results with LLM-generated summaries in a vector database
  * for semantic retrieval across sessions.
@@ -140,7 +140,7 @@ export type ToolsFilterConfig = {
 /**
  * Complete extension configuration.
  */
-export type ToolResultVectorConfig = {
+export type ToolResultSummaryConfig = {
   /** Whether the extension is enabled */
   enabled: boolean;
   /** Mode: "off", "store-only", "retrieve-only", "full" */
@@ -158,7 +158,7 @@ export type ToolResultVectorConfig = {
 /**
  * Raw configuration from user (partial, with optional fields).
  */
-export type ToolResultVectorUserConfig = {
+export type ToolResultSummaryUserConfig = {
   enabled?: boolean;
   mode?: "off" | "store-only" | "retrieve-only" | "full";
   summary?: Partial<SummaryConfig>;
@@ -170,7 +170,7 @@ export type ToolResultVectorUserConfig = {
 /**
  * Runtime state for the extension.
  */
-export type ToolResultVectorRuntime = {
+export type ToolResultSummaryRuntime = {
   /** Whether the store is initialized */
   initialized: boolean;
   /** Last initialization error, if any */
@@ -185,9 +185,9 @@ export type ToolResultVectorRuntime = {
  * Runtime value to be set before session starts.
  * Contains configuration for the extension.
  */
-export type ToolResultVectorRuntimeValue = ToolResultVectorRuntime & {
+export type ToolResultSummaryRuntimeValue = ToolResultSummaryRuntime & {
   /** Configuration for the extension */
-  config: ToolResultVectorConfig;
+  config: ToolResultSummaryConfig;
   /** Optional: resolved database path */
   resolvedDbPath?: string;
   /** OpenClaw config for embedding provider creation */

@@ -1,7 +1,7 @@
 /**
- * Tool Result Vector Extension Entry Point
+ * Tool Result Summary Extension Entry Point
  *
- * Opt-in vector storage and retrieval for tool execution results.
+ * Opt-in summary storage and retrieval for tool execution results.
  *
  * When enabled, this extension will:
  * 1. Generate LLM summaries of large tool outputs
@@ -12,14 +12,14 @@
  * the agent to recall relevant tool results from previous turns.
  */
 
-export { default } from "./tool-result-vector/extension.js";
+export { default } from "./tool-result-summary/extension.js";
 
 export {
   computeEffectiveSettings,
-  DEFAULT_TOOL_RESULT_VECTOR_CONFIG,
-} from "./tool-result-vector/settings.js";
+  DEFAULT_TOOL_RESULT_SUMMARY_CONFIG,
+} from "./tool-result-summary/settings.js";
 
 export type {
-  ToolResultVectorConfig,
-  ToolResultVectorUserConfig,
-} from "./tool-result-vector/types.js";
+  ToolResultSummaryConfig,
+  ToolResultSummaryUserConfig,
+} from "./tool-result-summary/types.js";

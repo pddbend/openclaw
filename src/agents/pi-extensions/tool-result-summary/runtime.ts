@@ -1,20 +1,20 @@
 /**
- * Runtime state management for Tool Result Vector extension.
+ * Runtime state management for Tool Result Summary extension.
  *
  * Uses a WeakMap keyed by SessionManager to store per-session runtime state.
  */
 
-import type { ToolResultVectorRuntime } from "./types.js";
+import type { ToolResultSummaryRuntime } from "./types.js";
 
 /**
  * Runtime state per session.
  */
-const RUNTIME_REGISTRY = new WeakMap<object, ToolResultVectorRuntime>();
+const RUNTIME_REGISTRY = new WeakMap<object, ToolResultSummaryRuntime>();
 
 /**
  * Default runtime state.
  */
-function createDefaultRuntime(): ToolResultVectorRuntime {
+function createDefaultRuntime(): ToolResultSummaryRuntime {
   return {
     initialized: false,
     entryCount: 0,
@@ -25,9 +25,9 @@ function createDefaultRuntime(): ToolResultVectorRuntime {
 /**
  * Set runtime state for a session manager.
  */
-export function setToolResultVectorRuntime(
+export function setToolResultSummaryRuntime(
   sessionManager: unknown,
-  value: ToolResultVectorRuntime | null,
+  value: ToolResultSummaryRuntime | null,
 ): void {
   if (!sessionManager || typeof sessionManager !== "object") {
     return;
@@ -46,7 +46,7 @@ export function setToolResultVectorRuntime(
  * Get runtime state for a session manager.
  * Returns default state if not set.
  */
-export function getToolResultVectorRuntime(sessionManager: unknown): ToolResultVectorRuntime {
+export function getToolResultSummaryRuntime(sessionManager: unknown): ToolResultSummaryRuntime {
   if (!sessionManager || typeof sessionManager !== "object") {
     return createDefaultRuntime();
   }
@@ -58,15 +58,15 @@ export function getToolResultVectorRuntime(sessionManager: unknown): ToolResultV
  * Update runtime state for a session manager.
  * Merges partial updates with existing state.
  */
-export function updateToolResultVectorRuntime(
+export function updateToolResultSummaryRuntime(
   sessionManager: unknown,
-  updates: Partial<ToolResultVectorRuntime>,
+  updates: Partial<ToolResultSummaryRuntime>,
 ): void {
   if (!sessionManager || typeof sessionManager !== "object") {
     return;
   }
 
-  const current = getToolResultVectorRuntime(sessionManager);
+  const current = getToolResultSummaryRuntime(sessionManager);
   RUNTIME_REGISTRY.set(sessionManager, { ...current, ...updates });
 }
 
@@ -74,5 +74,5 @@ export function updateToolResultVectorRuntime(
  * Check if the extension is initialized for a session.
  */
 export function isInitialized(sessionManager: unknown): boolean {
-  return getToolResultVectorRuntime(sessionManager).initialized;
+  return getToolResultSummaryRuntime(sessionManager).initialized;
 }

@@ -3,15 +3,15 @@ import type { SessionManager } from "@mariozechner/pi-coding-agent";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { OpenClawConfig } from "../../config/config.js";
-import type { ToolResultVectorRuntimeValue } from "../pi-extensions/tool-result-vector/types.js";
+import type { ToolResultSummaryRuntimeValue } from "../pi-extensions/tool-result-summary/types.js";
 import { resolveContextWindowInfo } from "../context-window-guard.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../defaults.js";
 import { setCompactionSafeguardRuntime } from "../pi-extensions/compaction-safeguard-runtime.js";
 import { setContextPruningRuntime } from "../pi-extensions/context-pruning/runtime.js";
 import { computeEffectiveSettings } from "../pi-extensions/context-pruning/settings.js";
 import { makeToolPrunablePredicate } from "../pi-extensions/context-pruning/tools.js";
-import { setToolResultVectorRuntime } from "../pi-extensions/tool-result-vector/runtime.js";
-import { computeEffectiveSettings as computeToolResultVectorSettings } from "../pi-extensions/tool-result-vector/settings.js";
+import { setToolResultSummaryRuntime } from "../pi-extensions/tool-result-summary/runtime.js";
+import { computeEffectiveSettings as computeToolResultSummarySettings } from "../pi-extensions/tool-result-summary/settings.js";
 import { ensurePiCompactionReserveTokens } from "../pi-settings.js";
 import { isCacheTtlEligibleProvider, readLastCacheTtlTimestamp } from "./cache-ttl.js";
 
@@ -70,33 +70,33 @@ function buildContextPruningExtension(params: {
   };
 }
 
-function buildToolResultVectorExtension(params: {
+function buildToolResultSummaryExtension(params: {
   cfg: OpenClawConfig | undefined;
   sessionManager: SessionManager;
 }): { additionalExtensionPaths?: string[] } {
   // Get config from agent defaults
-  const raw = params.cfg?.agents?.defaults?.toolResultVector as unknown;
+  const raw = params.cfg?.agents?.defaults?.toolResultSummary as unknown;
   if (!raw) {
     return {};
   }
 
-  const config = computeToolResultVectorSettings(raw);
+  const config = computeToolResultSummarySettings(raw);
   if (!config || !config.enabled) {
     return {};
   }
 
   // Set runtime with configuration - use type assertion for extended runtime
-  const runtimeValue: ToolResultVectorRuntimeValue = {
+  const runtimeValue: ToolResultSummaryRuntimeValue = {
     initialized: false,
     entryCount: 0,
     lastCleanupAt: null,
     config,
     openClawConfig: params.cfg,
   };
-  setToolResultVectorRuntime(params.sessionManager, runtimeValue);
+  setToolResultSummaryRuntime(params.sessionManager, runtimeValue);
 
   return {
-    additionalExtensionPaths: [resolvePiExtensionPath("tool-result-vector")],
+    additionalExtensionPaths: [resolvePiExtensionPath("tool-result-summary")],
   };
 }
 
@@ -131,9 +131,9 @@ export function buildEmbeddedExtensionPaths(params: {
   if (pruning.additionalExtensionPaths) {
     paths.push(...pruning.additionalExtensionPaths);
   }
-  const toolResultVector = buildToolResultVectorExtension(params);
-  if (toolResultVector.additionalExtensionPaths) {
-    paths.push(...toolResultVector.additionalExtensionPaths);
+  const toolResultSummary = buildToolResultSummaryExtension(params);
+  if (toolResultSummary.additionalExtensionPaths) {
+    paths.push(...toolResultSummary.additionalExtensionPaths);
   }
   return paths;
 }

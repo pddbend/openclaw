@@ -1,12 +1,12 @@
 /**
- * Tool Result Vector Extension
+ * Tool Result Summary Extension
  *
  * Captures tool execution results, generates summaries via LLM,
  * stores them in a vector database, and retrieves relevant results
  * for future tasks.
  *
  * This extension follows the OpenClaw embedded extension pattern:
- * 1. Runtime state is set via setToolResultVectorRuntime before session starts
+ * 1. Runtime state is set via setToolResultSummaryRuntime before session starts
  * 2. Extension reads runtime state to get configuration and services
  * 3. Extension hooks into tool_result and before_agent_start events
  */
@@ -19,11 +19,11 @@ import type {
 } from "@mariozechner/pi-coding-agent";
 import type { OpenClawConfig } from "../../../config/config.js";
 import type { EmbeddingProvider } from "../../../memory/embeddings.js";
-import type { ToolResultVectorConfig, ToolResultVectorRuntimeValue } from "./types.js";
+import type { ToolResultSummaryConfig, ToolResultSummaryRuntimeValue } from "./types.js";
 import { createEmbeddingProvider } from "../../../memory/embeddings.js";
 import { createRetriever, buildSearchQuery } from "./retriever.js";
-import { getToolResultVectorRuntime, updateToolResultVectorRuntime } from "./runtime.js";
-import { ToolResultVectorStore } from "./store.js";
+import { getToolResultSummaryRuntime, updateToolResultSummaryRuntime } from "./runtime.js";
+import { ToolResultSummaryStore } from "./store.js";
 import { createSummarizer, createLLMClient } from "./summarizer.js";
 import { makeToolFilterPredicate, estimateContentLength } from "./tools.js";
 
@@ -33,21 +33,21 @@ import { makeToolFilterPredicate, estimateContentLength } from "./tools.js";
 const serviceCache = new WeakMap<
   object,
   {
-    store: ToolResultVectorStore;
+    store: ToolResultSummaryStore;
     embeddings: EmbeddingProvider;
     shouldProcess: (toolName: string) => boolean;
-    config: ToolResultVectorConfig;
+    config: ToolResultSummaryConfig;
   }
 >();
 
 /**
  * Get or initialize services for the extension.
  */
-async function ensureServices(runtime: ToolResultVectorRuntimeValue): Promise<{
-  store: ToolResultVectorStore;
+async function ensureServices(runtime: ToolResultSummaryRuntimeValue): Promise<{
+  store: ToolResultSummaryStore;
   embeddings: EmbeddingProvider;
   shouldProcess: (toolName: string) => boolean;
-  config: ToolResultVectorConfig;
+  config: ToolResultSummaryConfig;
 } | null> {
   // Check cache first
   const cached = serviceCache.get(runtime);
@@ -72,7 +72,7 @@ async function ensureServices(runtime: ToolResultVectorRuntimeValue): Promise<{
     const resolvedDbPath = runtime.resolvedDbPath ?? config.storage.dbPath;
 
     // Create store
-    const store = new ToolResultVectorStore(config.storage, embeddings, resolvedDbPath);
+    const store = new ToolResultSummaryStore(config.storage, embeddings, resolvedDbPath);
 
     await store.ensureInitialized();
 
@@ -85,7 +85,7 @@ async function ensureServices(runtime: ToolResultVectorRuntimeValue): Promise<{
 
     return result;
   } catch (err) {
-    console.error(`tool-result-vector: service initialization failed: ${String(err)}`);
+    console.error(`tool-result-summary: service initialization failed: ${String(err)}`);
     return null;
   }
 }
@@ -95,9 +95,9 @@ async function ensureServices(runtime: ToolResultVectorRuntimeValue): Promise<{
  *
  * This extension is loaded by Pi when its path is returned from
  * buildEmbeddedExtensionPaths. It reads configuration from the
- * runtime registry set by setToolResultVectorRuntime.
+ * runtime registry set by setToolResultSummaryRuntime.
  */
-export default function toolResultVectorExtension(api: ExtensionAPI): void {
+export default function toolResultSummaryExtension(api: ExtensionAPI): void {
   api.on("tool_result", async (event: ToolResultEvent, ctx: ExtensionContext) => {
     return handleToolResult(event, ctx);
   });
@@ -170,7 +170,7 @@ export default function toolResultVectorExtension(api: ExtensionAPI): void {
 
       return { messages: modifiedMessages };
     } catch (err) {
-      console.warn(`tool-result-vector: retrieval failed: ${String(err)}`);
+      console.warn(`tool-result-summary: retrieval failed: ${String(err)}`);
       return undefined;
     }
   });
@@ -195,12 +195,12 @@ function getUserMessageText(message: { role: string; content: unknown }): string
 /**
  * Get runtime value from session manager.
  */
-function getRuntime(sessionManager: unknown): ToolResultVectorRuntimeValue | null {
-  const runtime = getToolResultVectorRuntime(sessionManager);
+function getRuntime(sessionManager: unknown): ToolResultSummaryRuntimeValue | null {
+  const runtime = getToolResultSummaryRuntime(sessionManager);
   if (!runtime || !("config" in runtime)) {
     return null;
   }
-  return runtime as ToolResultVectorRuntimeValue;
+  return runtime as ToolResultSummaryRuntimeValue;
 }
 
 /**
@@ -263,7 +263,7 @@ async function handleToolResult(
     });
 
     if (!summaryResult.ok) {
-      console.warn(`tool-result-vector: summarization failed: ${summaryResult.error}`);
+      console.warn(`tool-result-summary: summarization failed: ${summaryResult.error}`);
       return undefined;
     }
 
@@ -280,13 +280,13 @@ async function handleToolResult(
     });
 
     // Update runtime state
-    updateToolResultVectorRuntime(ctx.sessionManager, {
+    updateToolResultSummaryRuntime(ctx.sessionManager, {
       entryCount: services.store.getCount(),
     });
 
     return undefined;
   } catch (err) {
-    console.warn(`tool-result-vector: failed to store result: ${String(err)}`);
+    console.warn(`tool-result-summary: failed to store result: ${String(err)}`);
     return undefined;
   }
 }

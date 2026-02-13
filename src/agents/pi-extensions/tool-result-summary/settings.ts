@@ -1,10 +1,10 @@
 /**
- * Settings management for Tool Result Vector extension.
+ * Settings management for Tool Result Summary extension.
  */
 
 import type {
-  ToolResultVectorConfig,
-  ToolResultVectorUserConfig,
+  ToolResultSummaryConfig,
+  ToolResultSummaryUserConfig,
   SummaryConfig,
   SummaryCacheConfig,
   SummaryBatchConfig,
@@ -68,7 +68,7 @@ export const DEFAULT_TOOLS_FILTER_CONFIG: ToolsFilterConfig = {
 /**
  * Default complete configuration.
  */
-export const DEFAULT_TOOL_RESULT_VECTOR_CONFIG: ToolResultVectorConfig = {
+export const DEFAULT_TOOL_RESULT_SUMMARY_CONFIG: ToolResultSummaryConfig = {
   enabled: false,
   mode: "full",
   summary: DEFAULT_SUMMARY_CONFIG,
@@ -81,18 +81,18 @@ export const DEFAULT_TOOL_RESULT_VECTOR_CONFIG: ToolResultVectorConfig = {
  * Compute effective settings from user configuration.
  * Merges user config with defaults.
  */
-export function computeEffectiveSettings(raw: unknown): ToolResultVectorConfig | null {
+export function computeEffectiveSettings(raw: unknown): ToolResultSummaryConfig | null {
   if (!raw || typeof raw !== "object") {
     return null;
   }
 
-  const cfg = raw as ToolResultVectorUserConfig;
+  const cfg = raw as ToolResultSummaryUserConfig;
 
   if (cfg.enabled === false || cfg.mode === "off") {
     return null;
   }
 
-  const result: ToolResultVectorConfig = structuredClone(DEFAULT_TOOL_RESULT_VECTOR_CONFIG);
+  const result: ToolResultSummaryConfig = structuredClone(DEFAULT_TOOL_RESULT_SUMMARY_CONFIG);
 
   // Top-level settings
   if (typeof cfg.enabled === "boolean") {

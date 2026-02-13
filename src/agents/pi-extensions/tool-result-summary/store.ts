@@ -19,9 +19,9 @@ type LanceDBTable = Awaited<ReturnType<LanceDBConnection["openTable"]>>;
 const TABLE_NAME = "tool_results";
 
 /**
- * Vector store for tool results.
+ * Vector store for tool result summaries.
  */
-export class ToolResultVectorStore {
+export class ToolResultSummaryStore {
   private db: LanceDBConnection | null = null;
   private table: LanceDBTable | null = null;
   private initPromise: Promise<void> | null = null;

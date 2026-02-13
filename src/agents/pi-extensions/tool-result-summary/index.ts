@@ -1,5 +1,5 @@
 /**
- * Tool Result Vector Extension
+ * Tool Result Summary Extension
  *
  * Stores tool execution results with LLM-generated summaries in a vector database
  * for semantic retrieval across sessions.
@@ -17,7 +17,7 @@
  *
  * ```yaml
  * agents:
- *   toolResultVector:
+ *   toolResultSummary:
  *     enabled: true
  *     mode: "full"  # "off", "store-only", "retrieve-only", "full"
  *     summary:
@@ -34,22 +34,22 @@ export { default } from "./extension.js";
 export type {
   ToolResultEntry,
   ToolResultSearchResult,
-  ToolResultVectorConfig,
-  ToolResultVectorUserConfig,
+  ToolResultSummaryConfig,
+  ToolResultSummaryUserConfig,
   SummaryConfig,
   SummaryCacheConfig,
   SummaryBatchConfig,
   StorageConfig,
   RetrievalConfig,
   ToolsFilterConfig,
-  ToolResultVectorRuntime,
-  ToolResultVectorRuntimeValue,
+  ToolResultSummaryRuntime,
+  ToolResultSummaryRuntimeValue,
 } from "./types.js";
 
 // Export settings
 export {
   computeEffectiveSettings,
-  DEFAULT_TOOL_RESULT_VECTOR_CONFIG,
+  DEFAULT_TOOL_RESULT_SUMMARY_CONFIG,
   DEFAULT_SUMMARY_CONFIG,
   DEFAULT_STORAGE_CONFIG,
   DEFAULT_RETRIEVAL_CONFIG,
@@ -58,13 +58,13 @@ export {
 
 // Export runtime
 export {
-  getToolResultVectorRuntime,
-  setToolResultVectorRuntime,
-  updateToolResultVectorRuntime,
+  getToolResultSummaryRuntime,
+  setToolResultSummaryRuntime,
+  updateToolResultSummaryRuntime,
 } from "./runtime.js";
 
 // Export store
-export { ToolResultVectorStore } from "./store.js";
+export { ToolResultSummaryStore } from "./store.js";
 
 // Export retriever
 export { createRetriever, buildSearchQuery, formatResultsForContext } from "./retriever.js";
