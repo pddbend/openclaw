@@ -71,6 +71,7 @@ export const DEFAULT_TOOLS_FILTER_CONFIG: ToolsFilterConfig = {
 export const DEFAULT_TOOL_RESULT_SUMMARY_CONFIG: ToolResultSummaryConfig = {
   enabled: false,
   mode: "full",
+  oversizedHandling: "truncate",
   summary: DEFAULT_SUMMARY_CONFIG,
   storage: DEFAULT_STORAGE_CONFIG,
   retrieval: DEFAULT_RETRIEVAL_CONFIG,
@@ -100,6 +101,9 @@ export function computeEffectiveSettings(raw: unknown): ToolResultSummaryConfig 
   }
   if (cfg.mode) {
     result.mode = cfg.mode;
+  }
+  if (cfg.oversizedHandling) {
+    result.oversizedHandling = cfg.oversizedHandling;
   }
 
   // Summary settings

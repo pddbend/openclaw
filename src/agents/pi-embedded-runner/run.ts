@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 import type { ThinkLevel } from "../../auto-reply/thinking.js";
 import type { RunEmbeddedPiAgentParams } from "./run/params.js";
 import type { EmbeddedPiAgentMeta, EmbeddedPiRunResult } from "./types.js";
@@ -44,6 +45,8 @@ import {
   pickFallbackThinkingLevel,
   type FailoverReason,
 } from "../pi-embedded-helpers.js";
+import { getCachedStore } from "../pi-extensions/tool-result-summary/index.js";
+import { DEFAULT_STORAGE_CONFIG } from "../pi-extensions/tool-result-summary/settings.js";
 import { derivePromptTokens, normalizeUsage, type UsageLike } from "../usage.js";
 import { redactRunIdentifier, resolveRunWorkspaceDir } from "../workspace-run.js";
 import { compactEmbeddedPiSessionDirect } from "./compact.js";
@@ -581,11 +584,37 @@ export async function runEmbeddedPiAgent(
                   `[context-overflow-recovery] Attempting tool result truncation for ${provider}/${modelId} ` +
                     `(contextWindow=${contextWindowTokens} tokens)`,
                 );
+
+                // Get oversizedHandling config and store if needed
+                const oversizedHandling =
+                  params.config?.agents?.defaults?.toolResultSummary?.oversizedHandling ??
+                  "truncate";
+                let toolResultSummaryStore = undefined;
+
+                if (oversizedHandling === "summary") {
+                  // Resolve dbPath to get cached store
+                  const dbPath =
+                    params.config?.agents?.defaults?.toolResultSummary?.storage?.dbPath ??
+                    DEFAULT_STORAGE_CONFIG.dbPath;
+                  const resolvedDbPath = path.isAbsolute(dbPath)
+                    ? dbPath
+                    : path.resolve(agentDir, dbPath);
+                  toolResultSummaryStore = getCachedStore(resolvedDbPath);
+
+                  if (!toolResultSummaryStore) {
+                    log.warn(
+                      `[context-overflow-recovery] Tool result summary store not available at ${resolvedDbPath}, falling back to truncation`,
+                    );
+                  }
+                }
+
                 const truncResult = await truncateOversizedToolResultsInSession({
                   sessionFile: params.sessionFile,
                   contextWindowTokens,
                   sessionId: params.sessionId,
                   sessionKey: params.sessionKey,
+                  oversizedHandling,
+                  toolResultSummaryStore,
                 });
                 if (truncResult.truncated) {
                   log.info(

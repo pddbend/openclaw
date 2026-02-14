@@ -41,6 +41,20 @@ const serviceCache = new WeakMap<
 >();
 
 /**
+ * Global store cache by resolved DB path.
+ * Used for sharing store instances across different contexts (e.g., truncation handler).
+ */
+const storeCache = new Map<string, ToolResultSummaryStore>();
+
+/**
+ * Get a cached store by database path.
+ * Returns undefined if no store has been created for this path.
+ */
+export function getCachedStore(dbPath: string): ToolResultSummaryStore | undefined {
+  return storeCache.get(dbPath);
+}
+
+/**
  * Get or initialize services for the extension.
  */
 async function ensureServices(runtime: ToolResultSummaryRuntimeValue): Promise<{
@@ -82,6 +96,9 @@ async function ensureServices(runtime: ToolResultSummaryRuntimeValue): Promise<{
     // Cache the result
     const result = { store, embeddings, shouldProcess, config };
     serviceCache.set(runtime, result);
+
+    // Also cache by dbPath for cross-context access
+    storeCache.set(resolvedDbPath, store);
 
     return result;
   } catch (err) {

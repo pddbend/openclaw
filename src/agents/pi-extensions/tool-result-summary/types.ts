@@ -138,6 +138,13 @@ export type ToolsFilterConfig = {
 };
 
 /**
+ * How to handle oversized tool results during context compaction.
+ * - "truncate": Traditional truncation (default, existing behavior)
+ * - "summary": Replace with LLM-generated summary, original stored for retrieval
+ */
+export type OversizedHandlingMode = "truncate" | "summary";
+
+/**
  * Complete extension configuration.
  */
 export type ToolResultSummaryConfig = {
@@ -145,6 +152,8 @@ export type ToolResultSummaryConfig = {
   enabled: boolean;
   /** Mode: "off", "store-only", "retrieve-only", "full" */
   mode: "off" | "store-only" | "retrieve-only" | "full";
+  /** How to handle oversized tool results during context compaction */
+  oversizedHandling: OversizedHandlingMode;
   /** Summary generation settings */
   summary: SummaryConfig;
   /** Storage settings */
@@ -161,6 +170,7 @@ export type ToolResultSummaryConfig = {
 export type ToolResultSummaryUserConfig = {
   enabled?: boolean;
   mode?: "off" | "store-only" | "retrieve-only" | "full";
+  oversizedHandling?: OversizedHandlingMode;
   summary?: Partial<SummaryConfig>;
   storage?: Partial<StorageConfig>;
   retrieval?: Partial<RetrievalConfig>;

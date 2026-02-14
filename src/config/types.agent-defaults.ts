@@ -58,6 +58,8 @@ export type AgentToolResultSummaryConfig = {
   enabled?: boolean;
   /** Mode: "off", "store-only", "retrieve-only", "full" (default: "full"). */
   mode?: "off" | "store-only" | "retrieve-only" | "full";
+  /** How to handle oversized tool results: "truncate" | "summary" (default: "truncate"). */
+  oversizedHandling?: "truncate" | "summary";
   /** Summary generation settings. */
   summary?: {
     /** Maximum characters in generated summary (default: 200). */

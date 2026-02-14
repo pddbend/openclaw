@@ -30,6 +30,9 @@
 
 export { default } from "./extension.js";
 
+// Export store cache helper
+export { getCachedStore } from "./extension.js";
+
 // Export types
 export type {
   ToolResultEntry,
@@ -44,6 +47,7 @@ export type {
   ToolsFilterConfig,
   ToolResultSummaryRuntime,
   ToolResultSummaryRuntimeValue,
+  OversizedHandlingMode,
 } from "./types.js";
 
 // Export settings

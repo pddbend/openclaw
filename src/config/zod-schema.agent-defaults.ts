@@ -99,6 +99,7 @@ export const AgentDefaultsSchema = z
             z.literal("full"),
           ])
           .optional(),
+        oversizedHandling: z.union([z.literal("truncate"), z.literal("summary")]).optional(),
         summary: z
           .object({
             maxChars: z.number().int().positive().optional(),

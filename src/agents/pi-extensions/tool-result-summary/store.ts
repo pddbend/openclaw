@@ -215,6 +215,33 @@ export class ToolResultSummaryStore {
   }
 
   /**
+   * Get a tool result entry by tool call ID.
+   * Returns the most recent entry for the given toolCallId.
+   */
+  async getByToolCallId(toolCallId: string): Promise<ToolResultEntry | null> {
+    await this.ensureInitialized();
+
+    try {
+      const results = await this.table!.query().where(`toolCallId = '${toolCallId}'`).toArray();
+
+      if (results.length === 0) {
+        return null;
+      }
+
+      // Sort by createdAt descending and get the most recent
+      const sorted = results.toSorted(
+        (a, b) =>
+          ((b as Record<string, unknown>).createdAt as number) -
+          ((a as Record<string, unknown>).createdAt as number),
+      );
+
+      return this.rowToEntry(sorted[0] as Record<string, unknown>);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Update access count for an entry.
    */
   async touch(id: string): Promise<void> {
