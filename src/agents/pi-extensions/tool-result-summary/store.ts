@@ -230,7 +230,7 @@ export class ToolResultSummaryStore {
 
       // Sort by createdAt descending and get the most recent
       const sorted = results.toSorted(
-        (a, b) =>
+        (a: unknown, b: unknown) =>
           ((b as Record<string, unknown>).createdAt as number) -
           ((a as Record<string, unknown>).createdAt as number),
       );
