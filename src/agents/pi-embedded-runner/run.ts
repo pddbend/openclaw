@@ -45,7 +45,7 @@ import {
   pickFallbackThinkingLevel,
   type FailoverReason,
 } from "../pi-embedded-helpers.js";
-import { getCachedStore } from "../pi-extensions/tool-result-summary/index.js";
+import { getCachedStore } from "../pi-extensions/tool-result-summary/store-cache.js";
 import { DEFAULT_STORAGE_CONFIG } from "../pi-extensions/tool-result-summary/settings.js";
 import { derivePromptTokens, normalizeUsage, type UsageLike } from "../usage.js";
 import { redactRunIdentifier, resolveRunWorkspaceDir } from "../workspace-run.js";

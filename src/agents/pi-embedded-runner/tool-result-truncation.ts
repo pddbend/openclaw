@@ -1,7 +1,7 @@
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { TextContent } from "@mariozechner/pi-ai";
 import { SessionManager } from "@mariozechner/pi-coding-agent";
-import type { ToolResultSummaryStore } from "../pi-extensions/tool-result-summary/store.js";
+import type { ToolResultSummaryStoreLike } from "../pi-extensions/tool-result-summary/store-cache.js";
 import { log } from "./logger.js";
 
 /**
@@ -192,7 +192,7 @@ export async function truncateOversizedToolResultsInSession(params: {
   sessionId?: string;
   sessionKey?: string;
   oversizedHandling?: "truncate" | "summary";
-  toolResultSummaryStore?: ToolResultSummaryStore;
+  toolResultSummaryStore?: ToolResultSummaryStoreLike;
 }): Promise<{ truncated: boolean; truncatedCount: number; reason?: string }> {
   const {
     sessionFile,

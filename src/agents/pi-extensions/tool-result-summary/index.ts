@@ -30,8 +30,8 @@
 
 export { default } from "./extension.js";
 
-// Export store cache helper
-export { getCachedStore } from "./extension.js";
+// Export store cache helper (without lancedb dependency)
+export { getCachedStore, type ToolResultSummaryStoreLike } from "./store-cache.js";
 
 // Export types
 export type {
