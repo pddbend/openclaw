@@ -13,8 +13,9 @@
   "include": [
     "src/plugin-sdk/index.ts",
     "src/plugin-sdk/account-id.ts",
-    "src/types/**/*.d.ts",
-    "src/agents/pi-extensions/tool-result-summary/*.d.ts"
+    "src/plugin-sdk/keyed-async-queue.ts",
+    "src/agents/pi-extensions/tool-result-summary/*.d.ts",
+    "src/types/**/*.d.ts"
   ],
   "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
 }
