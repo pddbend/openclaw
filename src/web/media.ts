@@ -32,6 +32,12 @@ type WebMediaOptions = {
   /** Caller already validated the local path (sandbox/other guards); requires readFile override. */
   sandboxValidated?: boolean;
   readFile?: (filePath: string) => Promise<Buffer>;
+  /** Custom max side length for image optimization (overrides default grid) */
+  maxSideOverride?: number;
+  /** Custom quality for image optimization (overrides default grid) */
+  qualityOverride?: number;
+  /** Skip image optimization entirely */
+  skipOptimization?: boolean;
 };
 
 function resolveWebMediaOptions(params: {
@@ -488,6 +494,53 @@ export async function optimizeImageToJpeg(
   }
 
   throw new Error("Failed to optimize image");
+}
+
+/**
+ * Optimize image to JPEG with optional custom maxSide and quality overrides.
+ * When both overrides are provided, uses them directly instead of grid search.
+ */
+export async function optimizeImageToJpegWithOverrides(
+  buffer: Buffer,
+  maxBytes: number,
+  opts: {
+    contentType?: string;
+    fileName?: string;
+    maxSide?: number;
+    quality?: number;
+  } = {},
+): Promise<{
+  buffer: Buffer;
+  optimizedSize: number;
+  resizeSide: number;
+  quality: number;
+}> {
+  // If both overrides provided, use them directly
+  if (opts.maxSide !== undefined && opts.quality !== undefined) {
+    let source = buffer;
+    if (isHeicSource(opts)) {
+      try {
+        source = await convertHeicToJpeg(buffer);
+      } catch (err) {
+        throw new Error(`HEIC image conversion failed: ${String(err)}`, { cause: err });
+      }
+    }
+    const out = await resizeToJpeg({
+      buffer: source,
+      maxSide: opts.maxSide,
+      quality: opts.quality,
+      withoutEnlargement: true,
+    });
+    return {
+      buffer: out,
+      optimizedSize: out.length,
+      resizeSide: opts.maxSide,
+      quality: opts.quality,
+    };
+  }
+
+  // Otherwise fall back to existing grid search
+  return optimizeImageToJpeg(buffer, maxBytes, opts);
 }
 
 export { optimizeImageToPng };
