@@ -8,6 +8,35 @@ import type {
 } from "./types.base.js";
 import type { MemorySearchConfig } from "./types.tools.js";
 
+/**
+ * Image compression preset modes for the image tool.
+ * - "none": No compression, send original image
+ * - "low": Aggressive compression (max 800px side, quality 50)
+ * - "medium": Balanced compression (max 1200px side, quality 70)
+ * - "high": Minimal compression (max 2000px side, quality 95)
+ */
+export type ImageCompressionPreset = "none" | "low" | "medium" | "high";
+
+/**
+ * Detailed image compression settings for fine-grained control.
+ */
+export type ImageCompressionDetailConfig = {
+  /** Maximum image width in pixels. Default: 2000 */
+  maxWidth?: number;
+  /** Maximum image height in pixels. Default: 2000 */
+  maxHeight?: number;
+  /** JPEG quality (1-100). Default: 95 */
+  quality?: number;
+};
+
+/**
+ * Image compression configuration for the image tool.
+ * Accepts either a preset string or detailed settings object.
+ */
+export type ImageCompressionConfig =
+  | ImageCompressionPreset
+  | ImageCompressionDetailConfig;
+
 export type AgentModelEntryConfig = {
   alias?: string;
   /** Provider-specific API parameters (e.g., GLM-4.7 thinking mode). */
@@ -171,6 +200,8 @@ export type AgentDefaultsConfig = {
   contextPruning?: AgentContextPruningConfig;
   /** Compaction tuning and pre-compaction memory flush behavior. */
   compaction?: AgentCompactionConfig;
+  /** Adaptive context compression (quality-signal-driven compaction timing). */
+  adaptiveCompaction?: AdaptiveCompactionModeConfig;
   /** Embedded Pi runner hardening and compatibility controls. */
   embeddedPi?: {
     /**
@@ -326,6 +357,53 @@ export type AgentCompactionConfig = {
    * When set, compaction uses this model instead of the agent's primary model.
    * Falls back to the primary model when unset. */
   model?: string;
+};
+
+/**
+ * Adaptive context compression replaces fixed token thresholds with
+ * quality-signal-driven compaction timing.
+ */
+export type AdaptiveCompactionModeConfig = {
+  /** Enable adaptive compaction (default: false for now, migrate to true after testing). */
+  enabled?: boolean;
+  /** Signal collection tuning. */
+  signals?: {
+    /** How many turns to look back for distractor analysis (default: 10). */
+    distractorWindow?: number;
+    /** Similarity threshold for confusion pairs τ₂ (default: 0.8). */
+    confusionThreshold?: number;
+    /** Correction detection sliding window W (default: 5). */
+    correctionWindow?: number;
+    /** Repetition comparison window (default: 5). */
+    repetitionWindow?: number;
+  };
+  /** Emergency trigger thresholds. */
+  emergency?: {
+    /** Consecutive corrections to trigger emergency (default: 2). */
+    consecutiveCorrections?: number;
+    /** Sigma count for health drop detection (default: 3). */
+    healthDropSigma?: number;
+    /** Distractor density spike threshold (default: 0.3). */
+    distractorSpike?: number;
+  };
+  /** Load amplifier coefficients. */
+  amplifiers?: {
+    /** Distractor density weight α (default: 2.0). */
+    alpha?: number;
+    /** Confusion risk weight β (default: 1.5). */
+    beta?: number;
+    /** Positional risk weight γ (default: 0.5). */
+    gamma?: number;
+  };
+  /** Prediction parameters. */
+  prediction?: {
+    /** Minimum turns before GP kicks in (default: 4). */
+    minTurns?: number;
+    /** Base quality minimum Q_min (default: 0.70). */
+    qualityMin?: number;
+    /** Retreat coefficient for compaction targets (default: 0.6). */
+    retreatCoeff?: number;
+  };
 };
 
 export type AgentCompactionMemoryFlushConfig = {
